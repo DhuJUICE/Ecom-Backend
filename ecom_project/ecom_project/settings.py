@@ -56,6 +56,7 @@ MIDDLEWARE = [
 CSRF_TRUSTED_ORIGINS = [
     'http://127.0.0.1:3000',  # Add your frontend origin here
     'http://localhost:3000',  # Add if needed
+    'https://yummytummies.onrender.com', #deployed fronted
 ]
 
 CORS_ALLOW_ALL_ORIGINS = True
@@ -63,6 +64,7 @@ CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:3000",  # React app origin
     "http://localhost:3000",
+    'https://yummytummies.onrender.com', #deployed fronted
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -101,10 +103,14 @@ WSGI_APPLICATION = 'ecom_project.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'OrderingSystemDB',
-        'USER' : 'postgres',
-        'PASSWORD' : '1234',
-        'HOST' : 'localhost'
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'HOST': os.getenv('DB_HOST'),
+        'PORT': os.getenv('DB_PORT', '5432'),
+        'OPTIONS': {
+            'sslmode': 'require',
+        }
     }
 }
 
