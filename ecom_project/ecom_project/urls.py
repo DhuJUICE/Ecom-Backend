@@ -17,6 +17,24 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
+#swagger imports to use swagger documentation for restApi
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
+
+#getting the swagger documentation schema set up to be used
+# Define your schema view for Swagger documentation
+schema_view = get_schema_view(
+    openapi.Info(
+        title="Yummy Tummies API",
+        default_version='v1',
+        description="API documentation for Yummy Tummies Backend",
+        terms_of_service="https://www.google.com/policies/terms/",
+        contact=openapi.Contact(email="contact@yummytummies.com"),
+        license=openapi.License(name="MIT License"),
+    ),
+    public=True,
+)
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('api_management.urls')),
@@ -26,4 +44,7 @@ urlpatterns = [
     path('', include('product_management.urls')),
     path('', include('user_management.urls')),
     path('', include('contact_us.urls')),
+
+    # Swagger UI endpoint for API documentation
+    path('', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
 ]

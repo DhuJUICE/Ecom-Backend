@@ -5,6 +5,9 @@ from . import views
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 urlpatterns = [
+	#swagger documentation for api endpoint
+	path('api/token/refresh', TokenRefreshView.as_view(), name='token-refresh'),
+	
 	path('api', views.DisplayPage),
 
 	#Used for logging users in - No need for the login endpoint
