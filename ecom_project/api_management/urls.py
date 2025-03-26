@@ -46,7 +46,7 @@ urlpatterns = [
 
 	#CART MANAGEMENT API ENDPOINTS
 	path('api/cart', views.CartManagement.as_view(), name='api-cart'),
-	path('api/cart/<int:pk>', views.CartManagement.as_view(), name='api-cart-id'),
+	#path('api/cart/<int:pk>', views.CartManagement.as_view(), name='api-cart-id'),
     path('api/cart/<int:user_id>', views.CartManagement.as_view(), name='api-cart-id'),
     
 	#ADD TO CART FUNCTIONALITY
