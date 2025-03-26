@@ -218,23 +218,26 @@ class CartManagement(APIView):
         except Exception as e:
             return JsonResponse({"success": False, "error": str(e)}, status=500)
 
-    def put(self, request, cart_id):
+    def put(self, request, user_id):
         """
-        Update an existing cart item.
+        Update an existing cart for the given user.
         Returns JSON response.
         """
         try:
-            cart_item = CART.objects.get(id=cart_id)
+            # Assuming user_id is passed instead of cart_id
+            cart_item = CART.objects.get(user_id=user_id)  # Fetch cart based on user_id
             serializer = CartSerializer(cart_item, data=request.data)
+            
             if serializer.is_valid():
-                serializer.save()
+                serializer.save()  # Save the updated cart
                 return JsonResponse({"success": True, "data": serializer.data}, status=200)
             return JsonResponse({"success": False, "errors": serializer.errors}, status=400)
+
         except CART.DoesNotExist:
-            return JsonResponse({"success": False, "error": "Cart item not found"}, status=404)
+            return JsonResponse({"success": False, "error": "Cart not found for this user"}, status=404)
         except Exception as e:
             return JsonResponse({"success": False, "error": str(e)}, status=500)
-
+    
     def delete(self, request, cart_id):
         """
         Delete a cart item.
