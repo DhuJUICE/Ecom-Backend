@@ -192,10 +192,12 @@ class CartManagement(APIView):
             # Get the cart for the authenticated user
             cart = CART.objects.get(user=request.user.id)
 
+            user_id = request.user.id
+
             # Extract menuCartItems
             cart_items = cart.menuCartItems  # This is already stored as a dictionary
             print(str(cart_items))
-            return JsonResponse({"success": True, "cart": cart_items}, status=200)
+            return JsonResponse({"success": True, "cart": cart_items, "user_id":user_id}, status=200)
 
         except CART.DoesNotExist:
             return JsonResponse({"success": False, "cart": {}}, status=200)  # Return empty cart if not found
