@@ -366,9 +366,14 @@ class CartDecrementProduct(APIView):
             return JsonResponse({"success": False, "error": str(e)}, status=500)
 
 #___________________________________________________________
+from django.shortcuts import get_object_or_404
+from django.http import JsonResponse
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
+
 #TRANSACTION MANAGEMENT API ENDPOINTS
 class TransactionManagement(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request, transaction_id=None):
         if transaction_id:
@@ -384,6 +389,42 @@ class TransactionManagement(APIView):
         return JsonResponse({"success": True, "data": serializer.data}, status=200, safe=False)
 
     def post(self, request):
+        try:
+            user = request.user  # Get the authenticated user
+
+            # Get the user's cart
+            cart = get_object_or_404(CART, user=user)
+
+            # Get the payment method from request data
+            payment_method = request.data.get("paymentMethod")
+            if payment_method not in ["cash", "card"]:
+                return JsonResponse({"error": "Invalid payment method. Choose 'cash' or 'card'."}, status=400)
+
+            # Check if the cart is empty
+            if not cart.menuCartItems:
+                return JsonResponse({"error": "Cart is empty, cannot process transaction."}, status=400)
+
+            # Create a transaction log entry
+            transaction = TRANSACTION_LOG.objects.create(
+                user=user,
+                menuCartItems=cart.menuCartItems,  # Copy cart items
+                paymentMethod=payment_method  # Assign payment method
+            )
+
+            # Clear the user's cart
+            cart.menuCartItems = {}  # Empty the cart
+            cart.save()
+
+            return JsonResponse({"message": "Transaction successful!", "transaction_id": transaction.id}, status=201)
+
+        except CART.DoesNotExist:
+            return JsonResponse({"error": "Cart not found for this user."}, status=404)
+        except Exception as e:
+            return JsonResponse({"error": f"An unexpected error occurred: {str(e)}"}, status=500)
+
+
+"""
+    def post(self, request):
         cart_id = request.data.get("cartId")
         try:
             cart = CART.objects.get(id=cart_id)
@@ -397,7 +438,7 @@ class TransactionManagement(APIView):
             serializer.save()
             return JsonResponse({"success": True, "data": serializer.data}, status=201)
         return JsonResponse({"success": False, "errors": serializer.errors}, status=400)
-
+"""
     def put(self, request, transaction_id):
         try:
             transaction = TRANSACTION_LOG.objects.get(id=transaction_id)
