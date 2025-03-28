@@ -54,6 +54,12 @@ urlpatterns = [
 	#REMOVE PRODUCT FROM CART FUNCTIONALITY
 	path('api/cart/remove', views.CartRemoveProduct.as_view(), name='api-cart-remove'),
 
+	#INCREMENT PRODUCT QUANTITY IN USERS CART FUNCTIONALITY
+	path('api/cart/increment', views.CartIncrementProduct.as_view(), name='api-cart-increment-product'),
+
+	#DECREMENT PRODUCT QUANTITY IN USERS CART FUNCTIONALITY
+	path('api/cart/decrement', views.CartDecrementProduct.as_view(), name='api-cart-decrement-product'),
+
 	#TRANSACTION MANAGEMENT API ENDPOINTS
 	path('api/transaction', views.TransactionManagement.as_view(), name='api-transaction'),
 	path('api/transaction/<int:pk>', views.TransactionManagement.as_view(), name='api-transaction-id'),

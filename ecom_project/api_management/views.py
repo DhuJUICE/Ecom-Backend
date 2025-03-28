@@ -284,18 +284,86 @@ class CartRemoveProduct(APIView):
         except Exception as e:
             return JsonResponse({"success": False, "error": str(e)}, status=500)
 
-#api view functionality to update a certain product 
+#api view functionality to increment a certain products quantity by 1 
 class CartIncrementProduct(APIView):
     permission_classes = [IsAuthenticated]
 
     def put(self, request):
-        pass
+        """
+        Increment a menu item quantity in the user's cart.
+        """
+        try:
+            user = request.user
+            data = request.data
+            product_id = str(data.get("productId"))
 
+            if not product_id:
+                return JsonResponse({"success": False, "error": "Product ID is required"}, status=400)
+
+            # Get the user's cart
+            cart = CART.objects.filter(user=user).first()
+            if not cart:
+                return JsonResponse({"success": False, "error": "Cart not found"}, status=404)
+
+            # Ensure cart_items is always a dictionary
+            cart_items = cart.menuCartItems or {}
+
+            # Increment the quantity if the product exists
+            if product_id in cart_items:
+                cart_items[product_id] += 1  # Increment quantity
+            else:
+                return JsonResponse({"success": False, "error": "Product is not in user's cart"}, status=400)
+
+            # Save the updated cart
+            cart.menuCartItems = cart_items
+            cart.save()
+
+            return JsonResponse({"success": True, "message": "Product quantity incremented in user's cart", "cart": cart_items}, status=200)
+
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)}, status=500)
+
+#api view functionality to decrement a certain products quantity by 1 
 class CartDecrementProduct(APIView):
     permission_classes = [IsAuthenticated]
 
     def put(self, request):
-        pass
+        """
+        Decrement a menu item quantity in the user's cart.
+        """
+        try:
+            user = request.user
+            data = request.data
+            product_id = str(data.get("productId"))
+
+            if not product_id:
+                return JsonResponse({"success": False, "error": "Product ID is required"}, status=400)
+
+            # Get the user's cart
+            cart = CART.objects.filter(user=user).first()
+            if not cart:
+                return JsonResponse({"success": False, "error": "Cart not found"}, status=404)
+
+            # Ensure cart_items is always a dictionary
+            cart_items = cart.menuCartItems or {}
+
+            # Check if the product exists in the cart
+            if product_id in cart_items:
+                if cart_items[product_id] > 1:
+                    cart_items[product_id] -= 1  # Decrement quantity
+                else:
+                    return JsonResponse({"success": False, "error": "Cannot decrement further, quantity is already 1"}, status=400)
+            else:
+                return JsonResponse({"success": False, "error": "Product is not in user's cart"}, status=400)
+
+            # Save the updated cart
+            cart.menuCartItems = cart_items
+            cart.save()
+
+            return JsonResponse({"success": True, "message": "Product quantity decremented in user's cart", "cart": cart_items}, status=200)
+
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)}, status=500)
 
 #___________________________________________________________
 #TRANSACTION MANAGEMENT API ENDPOINTS
