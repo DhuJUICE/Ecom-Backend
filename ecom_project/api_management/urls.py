@@ -39,7 +39,7 @@ urlpatterns = [
 	path('api/cart/decrement', views.CartDecrementProduct.as_view(), name='api-cart-decrement-product'),
 
 	#TRANSACTION MANAGEMENT API ENDPOINTS
-	path('api/transaction', views.TransactionManagement.as_view(), name='api-transaction'),
+	path('api/transaction', views.TransactionManagement.as_view(), name='api-transaction-log'),
 	path('api/transaction/<int:pk>', views.TransactionManagement.as_view(), name='api-transaction-id'),
 
 	#CHECKOUT MANAGEMENT API ENDPOINTS

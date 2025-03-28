@@ -397,6 +397,7 @@ class TransactionManagement(APIView):
 
             # Get the payment method from request data
             payment_method = request.data.get("paymentMethod")
+            
             if payment_method not in ["cash", "card"]:
                 return JsonResponse({"error": "Invalid payment method. Choose 'cash' or 'card'."}, status=400)
 
