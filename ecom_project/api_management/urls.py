@@ -4,29 +4,7 @@ from . import views
 #token view imports
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
-#swagger imports to use swagger documentation for restApi
-from drf_yasg.views import get_schema_view
-from drf_yasg import openapi
-
-#getting the swagger documentation schema set up to be used
-# Define your schema view for Swagger documentation
-schema_view = get_schema_view(
-    openapi.Info(
-        title="Yummy Tummies API",
-        default_version='v1',
-        description="API documentation for Yummy Tummies Backend",
-        terms_of_service="https://www.google.com/policies/terms/",
-        contact=openapi.Contact(email="contact@yummytummies.com"),
-        license=openapi.License(name="MIT License"),
-    ),
-    public=True,
-)
-
 urlpatterns = [
-	#swagger documentation for api endpoint
-	# Swagger UI endpoint for API documentation
-    path('/swagger', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
-
 	path('api/token/refresh', TokenRefreshView.as_view(), name='token-refresh'),
 	
 	path('api', views.DisplayPage),
