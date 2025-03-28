@@ -423,23 +423,6 @@ class TransactionManagement(APIView):
         except Exception as e:
             return JsonResponse({"error": f"An unexpected error occurred: {str(e)}"}, status=500)
 
-
-"""
-    def post(self, request):
-        cart_id = request.data.get("cartId")
-        try:
-            cart = CART.objects.get(id=cart_id)
-        except CART.DoesNotExist:
-            return JsonResponse({"success": False, "error": "Cart not found"}, status=404)
-
-        # Create a transaction log from the cart data
-        transaction_data = {"cartId": cart.id}
-        serializer = TransactionSerializer(data=transaction_data)
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse({"success": True, "data": serializer.data}, status=201)
-        return JsonResponse({"success": False, "errors": serializer.errors}, status=400)
-"""
     def put(self, request, transaction_id):
         try:
             transaction = TRANSACTION_LOG.objects.get(id=transaction_id)
