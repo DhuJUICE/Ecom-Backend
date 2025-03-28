@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 # Create your models here.
 class TRANSACTION_LOG(models.Model):
     # Reference to the user who made the transaction
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     
     # Store transaction items with their quantities as a JSON object
     menuCartItems = models.JSONField(

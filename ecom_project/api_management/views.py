@@ -421,6 +421,7 @@ class TransactionManagement(APIView):
         except CART.DoesNotExist:
             return JsonResponse({"error": "Cart not found for this user."}, status=404)
         except Exception as e:
+            print(str(e))
             return JsonResponse({"error": f"An unexpected error occurred: {str(e)}"}, status=500)
 
     def put(self, request, transaction_id):

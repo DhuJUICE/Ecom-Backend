@@ -103,6 +103,7 @@ WSGI_APPLICATION = 'ecom_project.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
+"""
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -116,7 +117,20 @@ DATABASES = {
         }
     }
 }
-
+"""
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'neondb',  # Database name
+        'USER': 'neondb_owner',  # User for the database
+        'PASSWORD': 'npg_s5XLyrzb2fDx',  # Password for the database
+        'HOST': 'ep-dark-dawn-a2hjfd5l-pooler.eu-central-1.aws.neon.tech',  # Host for NeonDB
+        'PORT': '5432',  # Default PostgreSQL port
+        'OPTIONS': {
+            'sslmode': 'require',  # Ensures secure SSL connection
+        },
+    }
+}
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 
