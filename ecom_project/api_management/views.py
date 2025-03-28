@@ -469,6 +469,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
 
+
 #CHECKOUT MANAGEMENT API ENDPOINTS
 stripe.api_key = settings.STRIPE_TEST_SECRET_KEY
 
