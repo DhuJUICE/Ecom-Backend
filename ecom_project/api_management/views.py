@@ -249,6 +249,54 @@ class CartManagement(APIView):
         except Exception as e:
             return JsonResponse({"success": False, "error": str(e)}, status=500)
 
+class CartRemoveProduct(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request):
+        """
+        Remove a menu item from the user's cart.
+        """
+        try:
+            user = request.user
+            data = request.data
+            product_id = str(data.get("productId"))
+
+            if not product_id:
+                return JsonResponse({"success": False, "error": "Product ID is required"}, status=400)
+
+            # Get the user's cart
+            cart = CART.objects.filter(user=user).first()
+            if not cart:
+                return JsonResponse({"success": False, "error": "Cart not found"}, status=404)
+
+            # Load existing menuCartItems
+            cart_items = cart.menuCartItems or {}
+
+            # Remove the product if it exists
+            if product_id in cart_items:
+                del cart_items[product_id]
+                cart.menuCartItems = cart_items
+                cart.save()
+                return JsonResponse({"success": True, "message": "Product removed from cart", "cart": cart_items}, status=200)
+            else:
+                return JsonResponse({"success": False, "error": "Product is not in user's cart"}, status=400)
+
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)}, status=500)
+
+#api view functionality to update a certain product 
+class CartIncrementProduct(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request):
+        pass
+
+class CartDecrementProduct(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request):
+        pass
+
 #___________________________________________________________
 #TRANSACTION MANAGEMENT API ENDPOINTS
 class TransactionManagement(APIView):
