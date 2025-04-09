@@ -9,3 +9,4 @@ class PRODUCT(models.Model):
 	prodDesc = models.CharField(max_length = 100)
 	prodAvailQuant = models.IntegerField()
 	prodOnMenu =  models.BooleanField(default=False)
+	prodImagePath = models.CharField(max_length=255, blank=True, null=True)
