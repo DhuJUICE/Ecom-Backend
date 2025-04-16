@@ -35,6 +35,33 @@ def DisplayPage(request):
     return render(request, 'api_template.html')
 #
 ########
+#IMAGEKIT ENDPOINT TO CREATE AND RETURN TOKEN FOR AUTHENTICATION
+import hashlib
+import hmac
+import time
+from django.http import JsonResponse
+from django.conf import settings  # Ensure the ImageKit private key is set in settings
+
+def generate_imagekit_auth(request):
+    # Your ImageKit private API key from the ImageKit dashboard
+    private_key = settings.IMAGEKIT_PRIVATE_KEY
+
+    # Expiry time (1 minute from now)
+    expire_time = int(time.time()) + 60
+
+    # Generate the token
+    token = hmac.new(private_key.encode(), str(expire_time).encode(), hashlib.sha1).hexdigest()
+
+    # Generate the signature
+    signature = hmac.new(private_key.encode(), (str(expire_time) + token).encode(), hashlib.sha1).hexdigest()
+
+    # Return the token, signature, and expiration time
+    return JsonResponse({
+        'token': token,
+        'signature': signature,
+        'expire': expire_time
+    })
+
 #___________________________________________________________
 #USER MANAGEMENT API ENDPOINTS
 #API ENDPOINT FOR LOGIN

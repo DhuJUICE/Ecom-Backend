@@ -8,7 +8,7 @@ from decouple import config
 
 STRIPE_TEST_PUBLIC_KEY = config('STRIPE_TEST_PUBLIC_KEY')
 STRIPE_TEST_SECRET_KEY = config('STRIPE_TEST_SECRET_KEY')
-
+IMAGEKIT_PRIVATE_KEY = config('IMAGEKIT_PRIVATE_KEY')
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
