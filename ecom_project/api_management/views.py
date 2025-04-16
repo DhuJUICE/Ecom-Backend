@@ -39,8 +39,9 @@ def DisplayPage(request):
 import hashlib
 import hmac
 import time
+import uuid
 from django.http import JsonResponse
-from django.conf import settings  # Ensure the ImageKit private key is set in settings
+from django.conf import settings
 
 def generate_imagekit_auth(request):
     # Random unique token
