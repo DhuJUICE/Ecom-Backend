@@ -43,23 +43,26 @@ from django.http import JsonResponse
 from django.conf import settings  # Ensure the ImageKit private key is set in settings
 
 def generate_imagekit_auth(request):
-    # Your ImageKit private API key from the ImageKit dashboard
-    private_key = settings.IMAGEKIT_PRIVATE_KEY
+    # Random unique token
+    token = str(uuid.uuid4())
 
-    # Expiry time (1 minute from now)
-    expire_time = int(time.time()) + 60
+    # Expiry timestamp (e.g., 1 minute from now)
+    expire = int(time.time()) + 60
 
-    # Generate the token
-    token = hmac.new(private_key.encode(), str(expire_time).encode(), hashlib.sha1).hexdigest()
+    # String to sign: token + expire
+    string_to_sign = token + str(expire)
 
-    # Generate the signature
-    signature = hmac.new(private_key.encode(), (str(expire_time) + token).encode(), hashlib.sha1).hexdigest()
+    # Generate signature using private key
+    signature = hmac.new(
+        key=settings.IMAGEKIT_PRIVATE_KEY.encode(),
+        msg=string_to_sign.encode(),
+        digestmod=hashlib.sha1
+    ).hexdigest()
 
-    # Return the token, signature, and expiration time
     return JsonResponse({
         'token': token,
-        'signature': signature,
-        'expire': expire_time
+        'expire': expire,
+        'signature': signature
     })
 
 #___________________________________________________________
