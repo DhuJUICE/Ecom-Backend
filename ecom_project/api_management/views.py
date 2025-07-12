@@ -139,7 +139,8 @@ class ProductManagement(APIView):
             except PRODUCT.DoesNotExist:
                 return Response({"error": "Product not found"}, status=status.HTTP_404_NOT_FOUND)
         else:
-            products = PRODUCT.objects.all()
+            #products = PRODUCT.objects.all()
+            products = PRODUCT.objects.filter(approved=True)
             serializer = ProductSerializer(products, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
 
