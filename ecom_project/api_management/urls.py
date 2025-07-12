@@ -28,6 +28,10 @@ urlpatterns = [
 	path('api/product', views.ProductManagement.as_view(), name='api-product'),
 	path('api/product/<int:pk>', views.ProductManagement.as_view(), name='api-product-id'),
 
+	#PRODUCT MODERATION API ENDPOINTS
+	path('api/product/moderation', views.ProductModeration.as_view(), name='api-product-moderation'),
+	path('api/product/moderation/<int:pk>', views.ProductModeration.as_view(), name='api-product-moderation-id'),
+
 	#CART MANAGEMENT API ENDPOINTS
 	path('api/cart', views.CartManagement.as_view(), name='api-cart'),
 	path('api/cart/<int:pk>', views.CartManagement.as_view(), name='api-cart-id'),

@@ -42,7 +42,7 @@ from .serializers import MyTokenObtainPairSerializer
 
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
-	
+    
 ########
 #IMAGEKIT ENDPOINT TO CREATE AND RETURN TOKEN FOR AUTHENTICATION
 import hashlib
@@ -124,6 +124,18 @@ class Logout(APIView):
 
         # Handle other response types if necessary
         return JsonResponse({"error": "Unexpected response type"}, status=500)
+
+#___________________________________________________________
+#PRODUCT MODERATION API ENDPOINTS
+class ProductModeration(APIView):
+    permission_classes = [AllowAny]
+
+    # Get all products or a specific product by ID
+    def get(self, request):
+        #products = PRODUCT.objects.all()
+        products = PRODUCT.objects.filter(approved=False)
+        serializer = ProductSerializer(products, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 #___________________________________________________________
 #PRODUCT MANAGEMENT API ENDPOINTS
 class ProductManagement(APIView):
