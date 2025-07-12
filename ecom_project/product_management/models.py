@@ -10,3 +10,4 @@ class PRODUCT(models.Model):
 	prodAvailQuant = models.IntegerField()
 	prodOnMenu =  models.BooleanField(default=False)
 	prodImagePath = models.CharField(max_length=255, blank=True, null=True)
+	approved = models.BooleanField(default=False)
