@@ -5,6 +5,18 @@ from cart_management.models import CART
 from checkout_management.models import TRANSACTION_LOG
 from django.contrib.auth.models import User
 
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
+#custom serializer to add a field to the returned data from token endpoint
+class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+    def validate(self, attrs):
+        data = super().validate(attrs)
+
+        # Add custom fields to the response data
+        data['is_staff'] = self.user.is_staff
+
+        return data
+
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = PRODUCT

@@ -34,6 +34,15 @@ from django.utils.timezone import now as timezone_now
 def DisplayPage(request):
     return render(request, 'api_template.html')
 #
+
+#####
+#custom login endpoint that returns is_staff alongside the jwt token and refresh token
+from rest_framework_simplejwt.views import TokenObtainPairView
+from .serializers import MyTokenObtainPairSerializer
+
+class MyTokenObtainPairView(TokenObtainPairView):
+    serializer_class = MyTokenObtainPairSerializer
+	
 ########
 #IMAGEKIT ENDPOINT TO CREATE AND RETURN TOKEN FOR AUTHENTICATION
 import hashlib

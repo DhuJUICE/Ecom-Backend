@@ -5,7 +5,6 @@ from . import views
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 urlpatterns = [
-	path('api/token/refresh', TokenRefreshView.as_view(), name='token-refresh'),
 	
 	#image kit token
     path('api/imagekit/auth', views.generate_imagekit_auth, name='generate_imagekit_auth'),
@@ -13,8 +12,12 @@ urlpatterns = [
 	path('api', views.DisplayPage),
 
 	#Used for logging users in - No need for the login endpoint
-	path('api/token', TokenObtainPairView.as_view(), name='token'),
-    path('api/token/refresh', TokenRefreshView.as_view(), name='token-refresh'),
+	#path('api/token', TokenObtainPairView.as_view(), name='token'),
+    #path('api/token/refresh', TokenRefreshView.as_view(), name='token-refresh'),
+
+	#Used for custom logging users in - No need for the login endpoint and sends back is_staff attribute for Role Based Access Control
+	path('api/token', views.MyTokenObtainPairView.as_view(), name='token'),
+    path('api/token/refresh', views.MyTokenObtainPairView.as_view(), name='token-refresh'),
 
 	#USER MANAGEMENT API ENDPOINTS
 	path('api/register', views.Register.as_view(), name='api-register'),
