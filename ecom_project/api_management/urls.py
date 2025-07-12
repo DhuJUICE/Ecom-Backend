@@ -24,11 +24,15 @@ urlpatterns = [
 	#path('api/login', views.Login.as_view(), name='api-login'),
 	path('api/logout', views.Logout.as_view(), name='api-logout'),
 
-	#PRODUCT MANAGEMENT API ENDPOINTS
+	#PRODUCT MANAGEMENT API ENDPOINTS - FOR MENU
 	path('api/product', views.ProductManagement.as_view(), name='api-product'),
 	path('api/product/<int:pk>', views.ProductManagement.as_view(), name='api-product-id'),
 
-	#PRODUCT MODERATION API ENDPOINTS
+	#OWNER PRODUCT MANAGEMENT API ENDPOINTS - FOR BUSINESS OWNER MGMT PAGE
+	path('api/product/owner-mgmt', views.OwnerProductManagement.as_view(), name='api-product'),
+	path('api/product/owner-mgmt/<int:pk>', views.OwnerProductManagement.as_view(), name='api-product-id'),
+
+	#PRODUCT MODERATION API ENDPOINTS - FOR PRODUCT MGMT PAGE
 	path('api/product/moderation', views.ProductModeration.as_view(), name='api-product-moderation'),
 	path('api/product/moderation/<int:pk>', views.ProductModeration.as_view(), name='api-product-moderation-id'),
 

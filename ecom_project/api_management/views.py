@@ -126,6 +126,18 @@ class Logout(APIView):
         return JsonResponse({"error": "Unexpected response type"}, status=500)
 
 #___________________________________________________________
+#BUSINESS OWNER PRODUCT MANAGEMENT API ENDPOINTS
+class OwnerProductManagement(APIView):
+    permission_classes = [AllowAny]
+
+    # Get all products or a specific product by ID
+    def get(self, request):
+		user = request.user
+        #products = PRODUCT.objects.all()
+        products = PRODUCT.objects.filter(uploadUser=user)
+        serializer = ProductSerializer(products, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+#___________________________________________________________
 #PRODUCT MODERATION API ENDPOINTS
 class ProductModeration(APIView):
     permission_classes = [AllowAny]
