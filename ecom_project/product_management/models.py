@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 # Create your models here.
 class PRODUCT(models.Model):
@@ -11,3 +12,10 @@ class PRODUCT(models.Model):
     prodOnMenu =  models.BooleanField(default=False)
     prodImagePath = models.CharField(max_length=255, blank=True, null=True)
     approved = models.BooleanField(default=False)
+    uploadUser = models.ForeignKey(
+        User,               # The related model
+        on_delete=models.CASCADE,  # What happens when the related user is deleted
+        related_name='uploads',    # Optional: reverse relation name
+        null=False,                # Is this field required? Default is False
+        blank=False                # Required in forms
+    )
