@@ -132,7 +132,7 @@ class OwnerProductManagement(APIView):
 
     # Get all products or a specific product by ID
     def get(self, request):
-		user = request.user
+        user = request.user
         #products = PRODUCT.objects.all()
         products = PRODUCT.objects.filter(uploadUser=user)
         serializer = ProductSerializer(products, many=True)
