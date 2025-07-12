@@ -28,6 +28,9 @@ urlpatterns = [
 	path('api/product', views.ProductManagement.as_view(), name='api-product'),
 	path('api/product/<int:pk>', views.ProductManagement.as_view(), name='api-product-id'),
 
+	#PRODUCT MANAGEMENT API ENDPOINTS - FOR UPLOAD PRODUCT
+	path('api/product/upload', views.UploadProductManagement.as_view(), name='api-product-upload'),
+
 	#OWNER PRODUCT MANAGEMENT API ENDPOINTS - FOR BUSINESS OWNER MGMT PAGE
 	path('api/product/owner-mgmt', views.OwnerProductManagement.as_view(), name='api-product'),
 	path('api/product/owner-mgmt/<int:pk>', views.OwnerProductManagement.as_view(), name='api-product-id'),

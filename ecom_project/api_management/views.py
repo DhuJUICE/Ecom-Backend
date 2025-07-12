@@ -124,23 +124,37 @@ class Logout(APIView):
 
         # Handle other response types if necessary
         return JsonResponse({"error": "Unexpected response type"}, status=500)
+######################################################
+#UPLOAD PRODUCT MANAGEMENT API ENDPOINTS
+class UploadProductManagement(APIView):
+    permission_classes = [IsAuthenticated]
 
+    # Upload/add a new product
+    def post(self, request):
+        # Inject uploadUser into the request data
+        data = request.data.copy()
+        data['uploadUser'] = request.user.id
+
+        serializer = ProductSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 #___________________________________________________________
 #BUSINESS OWNER PRODUCT MANAGEMENT API ENDPOINTS
 class OwnerProductManagement(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     # Get all products or a specific product by ID
     def get(self, request):
-        user = request.user
-        #products = PRODUCT.objects.all()
-        products = PRODUCT.objects.filter(uploadUser=user)
+        user = request.user.id
+        products = PRODUCT.objects.filter(uploadUser_id=user)
         serializer = ProductSerializer(products, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 #___________________________________________________________
 #PRODUCT MODERATION API ENDPOINTS
 class ProductModeration(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     # Get all products or a specific product by ID
     def get(self, request):
