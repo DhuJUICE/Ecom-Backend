@@ -108,32 +108,18 @@ WSGI_APPLICATION = 'ecom_project.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DB_NAME'),
-        'USER': os.getenv('DB_USER'),
-        'PASSWORD': os.getenv('DB_PASSWORD'),
-        'HOST': os.getenv('DB_HOST'),
-        'PORT': os.getenv('DB_PORT', '5432'),
+        'ENGINE': 'django.db.backends.postgresql',  # Keep this hardcoded
+        'NAME': config('DB_NAME'),
+        'USER': config('DB_USER'),
+        'PASSWORD': config('DB_PASSWORD'),
+        'HOST': config('DB_HOST'),
+        'PORT': config('DB_PORT'),
         'OPTIONS': {
-            'sslmode': 'require',
-        }
-    }
-}
-"""
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'neondb',  # Database name
-        'USER': 'neondb_owner',  # User for the database
-        'PASSWORD': 'npg_s5XLyrzb2fDx',  # Password for the database
-        'HOST': 'ep-dark-dawn-a2hjfd5l-pooler.eu-central-1.aws.neon.tech',  # Host for NeonDB
-        'PORT': '5432',  # Default PostgreSQL port
-        'OPTIONS': {
-            'sslmode': 'require',  # Ensures secure SSL connection
+            'sslmode': config('DB_SSLMODE', default='require'),
         },
     }
 }
-"""
+
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 
