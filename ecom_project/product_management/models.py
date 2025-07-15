@@ -11,7 +11,6 @@ class PRODUCT(models.Model):
     prodAvailQuant = models.IntegerField()
     prodOnMenu =  models.BooleanField(default=False)
     prodImagePath = models.CharField(max_length=255, blank=True, null=True)
-    approved = models.BooleanField(default=False)
     uploadUser = models.ForeignKey(
         User,               # The related model
         on_delete=models.CASCADE,  # What happens when the related user is deleted
@@ -19,3 +18,8 @@ class PRODUCT(models.Model):
         null=False,                # Is this field required? Default is False
         blank=False                # Required in forms
     )
+    moderation_status = models.CharField(
+    max_length=10,
+    choices=[('pending', 'Pending'), ('approved', 'Approved'), ('rejected', 'Rejected')],
+    default='pending'
+)

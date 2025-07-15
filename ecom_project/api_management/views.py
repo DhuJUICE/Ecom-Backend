@@ -159,7 +159,7 @@ class ProductModeration(APIView):
     # Get all products or a specific product by ID
     def get(self, request):
         #products = PRODUCT.objects.all()
-        products = PRODUCT.objects.filter(approved=False)
+        products = PRODUCT.objects.filter(moderation_status="pending")
         serializer = ProductSerializer(products, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 #___________________________________________________________
@@ -178,7 +178,7 @@ class ProductManagement(APIView):
                 return Response({"error": "Product not found"}, status=status.HTTP_404_NOT_FOUND)
         else:
             #products = PRODUCT.objects.all()
-            products = PRODUCT.objects.filter(approved=True)
+            products = PRODUCT.objects.filter(moderation_status="approved")
             serializer = ProductSerializer(products, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
 
