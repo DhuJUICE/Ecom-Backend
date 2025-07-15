@@ -162,6 +162,19 @@ class ProductModeration(APIView):
         products = PRODUCT.objects.filter(moderation_status="pending")
         serializer = ProductSerializer(products, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    # Update an existing product
+    def patch(self, request, pk):
+        try:
+            product = PRODUCT.objects.get(pk=pk)
+        except PRODUCT.DoesNotExist:
+            return Response({"error": "Product not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+        serializer = ProductSerializer(product, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 #___________________________________________________________
 #PRODUCT MANAGEMENT API ENDPOINTS
 class ProductManagement(APIView):
@@ -181,14 +194,6 @@ class ProductManagement(APIView):
             products = PRODUCT.objects.filter(moderation_status="approved")
             serializer = ProductSerializer(products, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
-
-    # Add a new product
-    def post(self, request):
-        serializer = ProductSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     # Update an existing product
     def put(self, request, pk):
