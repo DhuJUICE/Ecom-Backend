@@ -18,6 +18,9 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         return data
 
 class ProductSerializer(serializers.ModelSerializer):
+    uploadUser = serializers.PrimaryKeyRelatedField(read_only=True)  # Prevent trying to update it
+    prodImagePath = serializers.CharField(required=False, allow_blank=True)
+
     class Meta:
         model = PRODUCT
         fields = '__all__'

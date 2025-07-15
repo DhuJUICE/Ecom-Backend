@@ -151,6 +151,28 @@ class OwnerProductManagement(APIView):
         products = PRODUCT.objects.filter(uploadUser_id=user)
         serializer = ProductSerializer(products, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+	# Update an existing product
+    def patch(self, request, pk):
+        try:
+            product = PRODUCT.objects.get(pk=pk)
+        except PRODUCT.DoesNotExist:
+            return Response({"error": "Product not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+        serializer = ProductSerializer(product, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    # Delete a product
+    def delete(self, request, pk):
+        try:
+            product = PRODUCT.objects.get(pk=pk)
+            product.delete()
+            return Response({"message": "Product deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+        except PRODUCT.DoesNotExist:
+            return Response({"error": "Product not found"}, status=status.HTTP_404_NOT_FOUND)
 #___________________________________________________________
 #PRODUCT MODERATION API ENDPOINTS
 class ProductModeration(APIView):
@@ -163,7 +185,7 @@ class ProductModeration(APIView):
         serializer = ProductSerializer(products, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    # Update an existing product
+    # Update an existing product's moderation_status only using PATCH
     def patch(self, request, pk):
         try:
             product = PRODUCT.objects.get(pk=pk)

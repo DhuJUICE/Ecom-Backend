@@ -9,7 +9,6 @@ class PRODUCT(models.Model):
     prodPrice = models.DecimalField(max_digits=10, decimal_places=2)
     prodDesc = models.CharField(max_length = 100)
     prodAvailQuant = models.IntegerField()
-    prodOnMenu =  models.BooleanField(default=False)
     prodImagePath = models.CharField(max_length=255, blank=True, null=True)
     uploadUser = models.ForeignKey(
         User,               # The related model
