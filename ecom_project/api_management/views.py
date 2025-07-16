@@ -76,6 +76,7 @@ def generate_imagekit_auth(request):
     })
 
 #___________________________________________________________
+##############################################################
 #USER MANAGEMENT API ENDPOINTS
 #API ENDPOINT FOR LOGIN
 class Login(APIView):
@@ -108,6 +109,61 @@ class Register(APIView):
 
         # Handle other response types if necessary
         return JsonResponse({"error": "Unexpected response type"}, status=500)
+
+class UserManagement(APIView):
+    """
+    API endpoint for managing User accounts.
+    Supports GET, POST, PUT, DELETE.
+    """
+
+    def get(self, request, user_id=None):
+        try:
+            if user_id:
+                user = User.objects.get(id=user_id)
+                serializer = UserSerializer(user)
+                return JsonResponse({"success": True, "user": serializer.data}, status=200)
+            else:
+                users = User.objects.all()
+                serializer = UserSerializer(users, many=True)
+                return JsonResponse({"success": True, "users": serializer.data}, status=200, safe=False)
+        except User.DoesNotExist:
+            return JsonResponse({"success": False, "error": "User not found"}, status=404)
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)}, status=500)
+
+    def post(self, request):
+        try:
+            serializer = UserSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return JsonResponse({"success": True, "user": serializer.data}, status=201)
+            return JsonResponse({"success": False, "errors": serializer.errors}, status=400)
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)}, status=500)
+
+    def put(self, request, user_id):
+        try:
+            user = User.objects.get(id=user_id)
+            serializer = UserSerializer(user, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return JsonResponse({"success": True, "user": serializer.data}, status=200)
+            return JsonResponse({"success": False, "errors": serializer.errors}, status=400)
+        except User.DoesNotExist:
+            return JsonResponse({"success": False, "error": "User not found"}, status=404)
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)}, status=500)
+
+    def delete(self, request, user_id):
+        try:
+            user = User.objects.get(id=user_id)
+            user.delete()
+            return JsonResponse({"success": True, "message": "User deleted successfully"}, status=204)
+        except User.DoesNotExist:
+            return JsonResponse({"success": False, "error": "User not found"}, status=404)
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)}, status=500)
+
 
 #API ENDPOINT FOR LOGOUT
 class Logout(APIView):

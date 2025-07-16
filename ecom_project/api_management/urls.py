@@ -24,6 +24,9 @@ urlpatterns = [
 	#path('api/login', views.Login.as_view(), name='api-login'),
 	path('api/logout', views.Logout.as_view(), name='api-logout'),
 
+	path('api/user', views.UserManagement.as_view(), name='api-user-mgmt'),
+	path('api/user/<int:pk>', views.UserManagement.as_view(), name='api-user-mgmt-id'),
+
 	#PRODUCT MANAGEMENT API ENDPOINTS - FOR MENU
 	path('api/product', views.ProductManagement.as_view(), name='api-product'),
 	path('api/product/<int:pk>', views.ProductManagement.as_view(), name='api-product-id'),
