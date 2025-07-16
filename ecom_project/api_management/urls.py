@@ -28,7 +28,7 @@ urlpatterns = [
 	path('api/user/<int:pk>', views.UserManagement.as_view(), name='api-user-mgmt-id'),
 
 	path('api/user/business-owner', views.BusinessOwnerManagement.as_view(), name='api-user-business-owner-mgmt'),
-	path('api/user/business-owner/<int:pk>', views.BusinessOwnerManagement.as_view(), name='api-user-business-owner-mgmt-id'),
+	path('api/user/business-owner/<int:user_id>', views.BusinessOwnerManagement.as_view(), name='api-user-business-owner-mgmt-id'),
 
 	#PRODUCT MANAGEMENT API ENDPOINTS - FOR MENU
 	path('api/product', views.ProductManagement.as_view(), name='api-product'),

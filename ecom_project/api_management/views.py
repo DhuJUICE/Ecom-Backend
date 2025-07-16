@@ -138,12 +138,12 @@ class BusinessOwnerManagement(APIView):
             serializer = UserSerializer(data=request.data)
             if serializer.is_valid():
                 serializer.save()
-                return JsonResponse({"success": True, "user": serializer.data}, status=201)
+                return JsonResponse({"success": True, "user": serializer.data}, status=200)
             return JsonResponse({"success": False, "errors": serializer.errors}, status=400)
         except Exception as e:
             return JsonResponse({"success": False, "error": str(e)}, status=500)
 
-    def put(self, request, user_id):
+    def patch(self, request, user_id):
         try:
             user = User.objects.get(id=user_id)
             serializer = UserSerializer(user, data=request.data, partial=True)
@@ -160,7 +160,7 @@ class BusinessOwnerManagement(APIView):
         try:
             user = User.objects.get(id=user_id)
             user.delete()
-            return JsonResponse({"success": True, "message": "User deleted successfully"}, status=204)
+            return JsonResponse({"success": True, "message": "User deleted successfully"}, status=200)
         except User.DoesNotExist:
             return JsonResponse({"success": False, "error": "User not found"}, status=404)
         except Exception as e:
@@ -193,7 +193,7 @@ class UserManagement(APIView):
             serializer = UserSerializer(data=request.data)
             if serializer.is_valid():
                 serializer.save()
-                return JsonResponse({"success": True, "user": serializer.data}, status=201)
+                return JsonResponse({"success": True, "user": serializer.data}, status=200)
             return JsonResponse({"success": False, "errors": serializer.errors}, status=400)
         except Exception as e:
             return JsonResponse({"success": False, "error": str(e)}, status=500)
@@ -215,7 +215,7 @@ class UserManagement(APIView):
         try:
             user = User.objects.get(id=user_id)
             user.delete()
-            return JsonResponse({"success": True, "message": "User deleted successfully"}, status=204)
+            return JsonResponse({"success": True, "message": "User deleted successfully"}, status=200)
         except User.DoesNotExist:
             return JsonResponse({"success": False, "error": "User not found"}, status=404)
         except Exception as e:
