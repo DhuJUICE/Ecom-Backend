@@ -138,6 +138,50 @@ def register_view(request):
         status=405
     )
 
-def logout_view(request):
-    auth.logout(request)
-    return JsonResponse({"message": "You have logged out successfully!", "status": "success"}, status=200)
+"""
+def register_view(request):
+	if request.method == 'POST':
+		try:
+			data = json.loads(request.body)
+			
+			first_name = data.get('first_name')
+			last_name = data.get('last_name')
+			email = data.get('email')
+			password = data.get('password')
+			confirm_password = data.get('confirm_password')
+			username = email
+			
+			# Optional business owner request flag
+			request_business_owner = data.get('request_business_owner', False)
+			
+			if User.objects.filter(email=email).exists():
+				return JsonResponse({"message": "Email already exists.", "status": "error"}, status=400)
+
+			if password != confirm_password:
+				return JsonResponse({"message": "Passwords do not match.", "status": "error"}, status=400)
+
+			new_user = User.objects.create_user(
+				first_name=first_name,
+				last_name=last_name,
+				username=username,
+				email=email,
+				password=password
+			)
+			
+			# Create associated UserProfile manually with custom role request info
+			role = 'openUser'  # default
+			business_owner_request = bool(request_business_owner)
+
+			UserProfile.objects.create(
+				user=new_user,
+				role=role,
+				business_owner_request=business_owner_request
+			)
+
+			return JsonResponse({"message": "User registered successfully!", "status": "success"}, status=201)
+
+		except json.JSONDecodeError:
+			return JsonResponse({"message": "Invalid JSON format.", "status": "error"}, status=400)
+
+	return JsonResponse({"message": "Invalid request method. POST required.", "status": "error"}, status=405)
+"""

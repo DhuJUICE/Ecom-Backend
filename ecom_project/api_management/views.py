@@ -78,22 +78,6 @@ def generate_imagekit_auth(request):
 #___________________________________________________________
 ##############################################################
 #USER MANAGEMENT API ENDPOINTS
-#API ENDPOINT FOR LOGIN
-class Login(APIView):
-    permission_classes = [AllowAny]
-
-    def post(self, request):
-        # Call the regular function
-        response = login_view(request)
-
-        # If the other function returns a JsonResponse, return its content as JSON
-        if isinstance(response, JsonResponse):
-            # Deserialize the content if it's a JsonResponse
-            return JsonResponse(json.loads(response.content), status=response.status_code)
-
-        # Handle other response types if necessary
-        return JsonResponse({"error": "Unexpected response type"}, status=500)
-
 #API ENDPOINT FOR SIGNUP/REGISTER
 class Register(APIView):
     permission_classes = [AllowAny]
@@ -222,21 +206,6 @@ class UserManagement(APIView):
             return JsonResponse({"success": False, "error": str(e)}, status=500)
 
 
-#API ENDPOINT FOR LOGOUT
-class Logout(APIView):
-    permission_classes = [AllowAny]
-
-    def post(self, request):
-        # Call the regular function
-        response = logout_view(request)
-
-        # If the other function returns a JsonResponse, return its content as JSON
-        if isinstance(response, JsonResponse):
-            # Deserialize the content if it's a JsonResponse
-            return JsonResponse(json.loads(response.content), status=response.status_code)
-
-        # Handle other response types if necessary
-        return JsonResponse({"error": "Unexpected response type"}, status=500)
 ######################################################
 #UPLOAD PRODUCT MANAGEMENT API ENDPOINTS
 class UploadProductManagement(APIView):

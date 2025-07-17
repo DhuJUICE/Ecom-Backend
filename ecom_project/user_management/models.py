@@ -1,20 +1,20 @@
-"""
 from django.db import models
 from django.contrib.auth.models import User
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
 
-    #options for users as roles
     USER_ROLES_CHOICES = [
-    #this open access user option is not needed as open access users will only be default
-    ('openUser', 'Open Access'),
-    #these are the roles that can be applied for
-    ('adminUser', 'Admin'),
-    ('educatorUser', 'Educator'),
-    ('moderatorUser', 'Moderator'),
-]
-    #User Profile details
-    #Acess role
+        ('openUser', 'Open Access'),
+        ('adminUser', 'Admin'),
+        ('moderatorUser', 'Moderator'),
+        ('businessOwner', 'Business Owner'),
+    ]
+
     role = models.CharField(max_length=20, choices=USER_ROLES_CHOICES, default='openUser')
-"""
+    
+    # Optional: track if business owner request is pending admin approval
+    business_owner_request = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.role}"
