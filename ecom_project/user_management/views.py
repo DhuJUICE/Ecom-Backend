@@ -122,11 +122,9 @@ def register_view(request):
 			role = 'openUser'  # default
 			business_owner_request = bool(request_business_owner)
 
-			UserProfile.objects.create(
-				user=new_user,
-				role=role,
-				business_owner_request=business_owner_request
-			)
+			new_user.userprofile.role = role
+			new_user.userprofile.business_owner_request = business_owner_request
+			new_user.userprofile.save()
 
 			return JsonResponse({"message": "User registered successfully!", "status": "success"}, status=201)
 
