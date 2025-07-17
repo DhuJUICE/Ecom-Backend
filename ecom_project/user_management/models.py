@@ -1,3 +1,20 @@
+"""
 from django.db import models
+from django.contrib.auth.models import User
 
-# Create your models here.
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+
+    #options for users as roles
+    USER_ROLES_CHOICES = [
+    #this open access user option is not needed as open access users will only be default
+    ('openUser', 'Open Access'),
+    #these are the roles that can be applied for
+    ('adminUser', 'Admin'),
+    ('educatorUser', 'Educator'),
+    ('moderatorUser', 'Moderator'),
+]
+    #User Profile details
+    #Acess role
+    role = models.CharField(max_length=20, choices=USER_ROLES_CHOICES, default='openUser')
+"""
