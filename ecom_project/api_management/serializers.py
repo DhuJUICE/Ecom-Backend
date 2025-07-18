@@ -6,6 +6,7 @@ from checkout_management.models import TRANSACTION_LOG
 from django.contrib.auth.models import User
 
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from user_management.models import UserProfile
 
 #custom serializer to add a field to the returned data from token endpoint
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -14,7 +15,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 
         # Add custom fields to the response data
         data['is_staff'] = self.user.is_staff
-
+        data['user_id'] = self.user.id
         return data
 
 class ProductSerializer(serializers.ModelSerializer):
@@ -40,7 +41,17 @@ class TransactionSerializer(serializers.ModelSerializer):
         model = TRANSACTION_LOG
         fields = '__all__'
 
+class UserProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserProfile  # your UserProfile model
+        fields = '__all__'
+
 class UserSerializer(serializers.ModelSerializer):
+    userprofile = UserProfileSerializer(read_only=True)
+
     class Meta:
         model = User
-        fields = '__all__'
+        fields = [
+            'id', 'username', 'first_name', 'last_name', 'email', 
+            'is_staff', 'is_active', 'date_joined', 'userprofile'
+        ]

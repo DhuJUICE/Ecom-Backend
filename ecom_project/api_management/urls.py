@@ -61,5 +61,5 @@ urlpatterns = [
 
 	#CHECKOUT MANAGEMENT API ENDPOINTS
 	path('api/checkout', views.CheckoutManagement.as_view(), name='api-checkout'),
-	
+	path('api/user/role/<int:pk>', views.RoleManagement.as_view(), name='user-role'),
 ]

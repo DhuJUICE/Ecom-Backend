@@ -78,6 +78,21 @@ def generate_imagekit_auth(request):
 #___________________________________________________________
 ##############################################################
 #USER MANAGEMENT API ENDPOINTS
+#USER ROLE MANAGEMENT FOR ROLE BASED ACCESS CONTROL
+class RoleManagement(APIView):
+    permission_classes = [AllowAny]  # Change as needed
+
+    def get(self, request, pk=None):
+        if pk:
+            user = get_object_or_404(User, pk=pk)
+
+            serializer = UserSerializer(user)
+            return JsonResponse(serializer.data, status=status.HTTP_200_OK)
+        else:
+            users = User.objects.all()
+            serializer = UserSerializer(users, many=True)
+            return JsonResponse(serializer.data, safe=False, status=status.HTTP_200_OK)
+
 #API ENDPOINT FOR SIGNUP/REGISTER
 class Register(APIView):
     permission_classes = [AllowAny]
