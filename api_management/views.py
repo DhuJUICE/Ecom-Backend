@@ -18,6 +18,15 @@ from browse_management.models import MENU
 from django.contrib.auth.models import User
 from checkout_management.models import TRANSACTION_LOG
 
+
+from django.conf import settings
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
+
+from checkout_management.views import checkout
+
+
 #Serializers imports
 from .serializers import *
 
@@ -346,30 +355,41 @@ class AddToCart(APIView):
 
     def post(self, request):
         """
-        Add or update a menu item in the user's cart.
+        Add or update a menu item in the user's cart with full product details.
         """
         try:
             user = request.user  # Get the authenticated user
             data = request.data
-            product_id = str(data.get("productId"))  # Convert to string for dictionary key
-            quantity = int(data.get("quantity", 1))  # Default quantity is 1
 
-            if not product_id:
-                return JsonResponse({"success": False, "error": "Product ID is required"}, status=400)
+            product_id = str(data.get("productId"))  # Convert to string for dict key
+            quantity = int(data.get("quantity", 1))  # Default quantity is 1
+            prod_name = data.get("prodName")
+            prod_price = data.get("prodPrice")
+            prod_image = data.get("prodImagePath")
+
+            # Validate required fields
+            if not all([product_id, prod_name, prod_price, prod_image]):
+                return JsonResponse({
+                    "success": False,
+                    "error": "Product ID, name, price, and image are required"
+                }, status=400)
 
             # Get or create the cart for the user
             cart, created = CART.objects.get_or_create(user=user)
 
             # Load existing menuCartItems
-            cart_items = cart.menuCartItems
+            cart_items = cart.menuCartItems  # this is a dict
 
-            # Update quantity if item already exists, otherwise add new item
-            if product_id in cart_items:
-                cart_items[product_id] = quantity
-            else:
-                cart_items[product_id] = quantity
+            # Update or add the product
+            cart_items[product_id] = {
+                "id": product_id,
+                "prodName": prod_name,
+                "prodPrice": prod_price,
+                "prodImagePath": prod_image,
+                "quantity": quantity
+            }
 
-            # Save the updated cart
+            # Save updated cart
             cart.menuCartItems = cart_items
             cart.save()
 
@@ -399,7 +419,7 @@ class CartManagement(APIView):
 
             # Extract menuCartItems
             cart_items = cart.menuCartItems  # This is already stored as a dictionary
-            print(str(cart_items))
+
             return JsonResponse({"success": True, "cart": cart_items, "user_id":user_id}, status=200)
 
         except CART.DoesNotExist:
@@ -648,33 +668,9 @@ class TransactionManagement(APIView):
         transaction.delete()
         return JsonResponse({"success": True, "message": "Transaction deleted successfully"}, status=204)
 #___________________________________________________________
-
-
-import stripe
-from django.conf import settings
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-import json
-
-
 #CHECKOUT MANAGEMENT API ENDPOINTS
-stripe.api_key = settings.STRIPE_TEST_SECRET_KEY
-
 class CheckoutManagement(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        stripe_token = request.POST.get('stripeToken')
-        total_price = int(float(request.POST.get('totalPurchaseTotal'))) * 100 # Amount in cents
-
-        try:
-            # Create a charge (you can also use a PaymentIntent depending on your use case)
-            charge = stripe.Charge.create(
-                amount=total_price,
-                currency='zar',  # You can change this to your currency (e.g., 'zar' for South African Rand)
-                source=stripe_token,
-                description='Payment for your order',
-            )
-            return JsonResponse({'status': 'success', 'charge': charge})
-        except stripe.error.StripeError as e:
-            return JsonResponse({'status': 'error', 'message': str(e)})
+        return checkout(request)
