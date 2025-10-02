@@ -6,10 +6,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 from decouple import config
 
-STRIPE_TEST_PUBLIC_KEY = config('STRIPE_TEST_PUBLIC_KEY')
-STRIPE_TEST_SECRET_KEY = config('STRIPE_TEST_SECRET_KEY')
+
 IMAGEKIT_PRIVATE_KEY = config('IMAGEKIT_PRIVATE_KEY')
-PAYSTACK_SECRET_KEY = config('PAYSTACK_SECRET_KEY')
+
+PAYFAST_TEST_MERCHANT_ID = config('PAYFAST_TEST_MERCHANT_ID')
+PAYFAST_TEST_MERCHANT_KEY = config('PAYFAST_TEST_MERCHANT_KEY')
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
@@ -19,7 +21,7 @@ SECRET_KEY = 'django-insecure-in(43*hkeezn*7g%p$%5@#n0n(#2$&m%97u4=s=!*op#sck2+!
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['ecom-project-qt91.onrender.com', '127.0.0.1', 'yummytummies-backend.onrender.com', 'yummytummies-backend2.onrender.com']
+ALLOWED_HOSTS = ['copyrights-virtue-partnership-obtaining.trycloudflare.com','ecom-project-qt91.onrender.com', '127.0.0.1', 'yummytummies-backend.onrender.com', 'yummytummies-backend2.onrender.com']
 
 
 # Application definition
