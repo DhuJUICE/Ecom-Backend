@@ -1,40 +1,35 @@
 from django.shortcuts import render
-
-#permissions for authentication and security
-from rest_framework.permissions import AllowAny
-from rest_framework.permissions import IsAuthenticated
-
-from rest_framework.views import APIView
+from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny
 from rest_framework import status
 from rest_framework.renderers import JSONRenderer
 from rest_framework.parsers import JSONParser
-import json
-
-#Model Imports
-from product_management.models import PRODUCT
-from cart_management.models import CART
-from browse_management.models import MENU
-from django.contrib.auth.models import User
-from checkout_management.models import TRANSACTION_LOG
-
-
 from django.conf import settings
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+
 import json
+import hashlib
+import hmac
+import time
+import uuid
+
+from product_management.models import PRODUCT
+from cart_management.models import CART
+from django.contrib.auth.models import User
+
+
 
 from checkout_management.views import checkout
-
+from user_management.views import *
+from checkout_management.views import *
 
 #Serializers imports
 from .serializers import *
 
-#User management functionality imports
-from user_management.views import *
-
-#User management functionality imports
-from checkout_management.views import *
 
 #date usage imports
 from django.utils.timezone import now as timezone_now
@@ -44,7 +39,6 @@ def DisplayPage(request):
     return render(request, 'api_template.html')
 #
 
-#####
 #custom login endpoint that returns is_staff alongside the jwt token and refresh token
 from rest_framework_simplejwt.views import TokenObtainPairView
 from .serializers import MyTokenObtainPairSerializer
@@ -54,12 +48,7 @@ class MyTokenObtainPairView(TokenObtainPairView):
     
 ########
 #IMAGEKIT ENDPOINT TO CREATE AND RETURN TOKEN FOR AUTHENTICATION
-import hashlib
-import hmac
-import time
-import uuid
-from django.http import JsonResponse
-from django.conf import settings
+
 
 def generate_imagekit_auth(request):
     # Random unique token
@@ -589,84 +578,7 @@ class CartDecrementProduct(APIView):
             return JsonResponse({"success": False, "error": str(e)}, status=500)
 
 #___________________________________________________________
-from django.shortcuts import get_object_or_404
-from django.http import JsonResponse
-from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated
 
-#TRANSACTION MANAGEMENT API ENDPOINTS
-class TransactionManagement(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request, transaction_id=None):
-        if transaction_id:
-            try:
-                transaction = TRANSACTION_LOG.objects.get(id=transaction_id)
-                serializer = TransactionSerializer(transaction)
-                return JsonResponse({"success": True, "data": serializer.data}, status=200)
-            except TRANSACTION_LOG.DoesNotExist:
-                return JsonResponse({"success": False, "error": "Transaction not found"}, status=404)
-
-        transactions = TRANSACTION_LOG.objects.all()
-        serializer = TransactionSerializer(transactions, many=True)
-        return JsonResponse({"success": True, "data": serializer.data}, status=200, safe=False)
-
-    def post(self, request):
-        try:
-            user = request.user  # Get the authenticated user
-
-            # Get the user's cart
-            cart = get_object_or_404(CART, user=user)
-
-            # Get the payment method from request data
-            payment_method = request.data.get("paymentMethod")
-            
-            if payment_method not in ["cash", "card"]:
-                return JsonResponse({"error": "Invalid payment method. Choose 'cash' or 'card'."}, status=400)
-
-            # Check if the cart is empty
-            if not cart.menuCartItems:
-                return JsonResponse({"error": "Cart is empty, cannot process transaction."}, status=400)
-
-            # Create a transaction log entry
-            transaction = TRANSACTION_LOG.objects.create(
-                user=user,
-                menuCartItems=cart.menuCartItems,  # Copy cart items
-                paymentMethod=payment_method  # Assign payment method
-            )
-
-            # Clear the user's cart
-            cart.menuCartItems = {}  # Empty the cart
-            cart.save()
-
-            return JsonResponse({"message": "Transaction successful!", "transaction_id": transaction.id}, status=201)
-
-        except CART.DoesNotExist:
-            return JsonResponse({"error": "Cart not found for this user."}, status=404)
-        except Exception as e:
-            print(str(e))
-            return JsonResponse({"error": f"An unexpected error occurred: {str(e)}"}, status=500)
-
-    def put(self, request, transaction_id):
-        try:
-            transaction = TRANSACTION_LOG.objects.get(id=transaction_id)
-        except TRANSACTION_LOG.DoesNotExist:
-            return JsonResponse({"success": False, "error": "Transaction not found"}, status=404)
-
-        serializer = TransactionSerializer(transaction, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse({"success": True, "data": serializer.data}, status=200)
-        return JsonResponse({"success": False, "errors": serializer.errors}, status=400)
-
-    def delete(self, request, transaction_id):
-        try:
-            transaction = TRANSACTION_LOG.objects.get(id=transaction_id)
-        except TRANSACTION_LOG.DoesNotExist:
-            return JsonResponse({"success": False, "error": "Transaction not found"}, status=404)
-
-        transaction.delete()
-        return JsonResponse({"success": True, "message": "Transaction deleted successfully"}, status=204)
 #___________________________________________________________
 #CHECKOUT MANAGEMENT API ENDPOINTS
 class CheckoutManagement(APIView):

@@ -9,7 +9,7 @@ urlpatterns = [
 	#image kit token
     path('api/imagekit/auth', views.generate_imagekit_auth, name='generate_imagekit_auth'),
     
-	path('api', views.DisplayPage),
+	path('/', views.DisplayPage),
 
 	#Used for custom logging users in - No need for the login endpoint and sends back is_staff attribute for Role Based Access Control
 	path('api/token', views.MyTokenObtainPairView.as_view(), name='token'),
@@ -54,10 +54,6 @@ urlpatterns = [
 
 	#DECREMENT PRODUCT QUANTITY IN USERS CART FUNCTIONALITY
 	path('api/cart/decrement', views.CartDecrementProduct.as_view(), name='api-cart-decrement-product'),
-
-	#TRANSACTION MANAGEMENT API ENDPOINTS
-	path('api/transaction', views.TransactionManagement.as_view(), name='api-transaction-log'),
-	path('api/transaction/<int:pk>', views.TransactionManagement.as_view(), name='api-transaction-id'),
 
 	#CHECKOUT MANAGEMENT API ENDPOINTS
 	path('api/checkout', views.CheckoutManagement.as_view(), name='api-checkout'),

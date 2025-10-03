@@ -1,5 +1,4 @@
 from django.db import models
-from browse_management.models import MENU
 from django.contrib.auth.models import User
 
 class CART(models.Model):

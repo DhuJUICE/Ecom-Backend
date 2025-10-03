@@ -7,6 +7,7 @@ import uuid
 import hashlib
 from urllib.parse import quote_plus, unquote_plus
 import requests
+from urllib.parse import urlencode
 
 # PayFast credentials
 PAYFAST_MERCHANT_ID = settings.PAYFAST_TEST_MERCHANT_ID
@@ -30,15 +31,20 @@ def checkout(request):
         data = json.loads(request.body)
         amount = float(data.get("totalPurchaseTotal", 0))
         # Generate a unique transaction ID
-        m_payment_id = str(uuid.uuid4())
+        m_payment_id = str(data.get("orderNumber"))
 
+        # Remove extra fields before validation
+        data.pop("orderNumber", None)       # remove if it exists
+        data.pop("deliveryMethod", None)    # remove if it exists
+
+        print(data)
         # Build PayFast payload
         payload = {
             "merchant_id": PAYFAST_MERCHANT_ID,
             "merchant_key": PAYFAST_MERCHANT_KEY,
             "return_url": "https://yourdomain.com/payment-success",
             "cancel_url": "https://yourdomain.com/payment-cancel",
-            "notify_url": "https://copyrights-virtue-partnership-obtaining.trycloudflare.com/ipn",
+            "notify_url": "https://pen-waterproof-posts-allows.trycloudflare.com/ipn",
             "m_payment_id": m_payment_id,
             "amount": "%.2f" % amount,
             "item_name": f"Order #{m_payment_id}",
@@ -48,7 +54,10 @@ def checkout(request):
         }
 
         # Construct PayFast URL
-        payment_url = f"{PAYFAST_URL}?{'&'.join(f'{k}={v}' for k,v in payload.items())}"
+        #payment_url = f"{PAYFAST_URL}?{'&'.join(f'{k}={v}' for k,v in payload.items())}"
+        # Encode all parameters properly
+        payment_url = f"{PAYFAST_URL}?{urlencode(payload)}"
+        
         return JsonResponse({"success": True, "payment_url": payment_url})
 
     except Exception as e:
@@ -62,6 +71,8 @@ def payfast_ipn(request):
     # Convert POST body to dict
     raw_body = request.body.decode("utf-8")
     data = {k: v for k, v in [pair.split('=') for pair in raw_body.split('&') if '=' in pair]}
+
+    
 
     # Validate with PayFast
     response = requests.post(
