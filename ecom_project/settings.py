@@ -61,8 +61,7 @@ MIDDLEWARE = [
 CSRF_TRUSTED_ORIGINS = [
     'http://127.0.0.1:3000',  # Add your frontend origin here
     'http://localhost:3000',  # Add if needed
-    'https://yummytummies.onrender.com', #deployed fronted
-    'https://yummytummies-frontend2.onrender.com', #second backup deployed frontend
+    'https://heranbites.onrender.com', #deployed fronted
 ]
 
 CORS_ALLOW_ALL_ORIGINS = True
