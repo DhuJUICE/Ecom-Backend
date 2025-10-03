@@ -69,7 +69,8 @@ CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:3000",  # React app origin
     "http://localhost:3000",
-    'https://heranbites.onrender.com', #deployed fronted
+    'https://yummytummies.onrender.com', #deployed fronted
+    'https://yummytummies-frontend2.onrender.com', #second backup deployed frontend
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -80,7 +81,12 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-			'api_management/html_templates
+			'browse_management/html_templates',
+			'api_management/html_templates',
+			'checkout_management/html_templates',
+			'cart_management/html_templates',
+			'product_management/html_templates',
+			'user_management/templates/user_management',
 		],
         'APP_DIRS': True,
         'OPTIONS': {
