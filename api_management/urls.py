@@ -5,57 +5,32 @@ from . import views
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 urlpatterns = [
-	
-	#image kit token
-    path('api/imagekit/auth', views.generate_imagekit_auth, name='generate_imagekit_auth'),
-    
-	path('/', views.DisplayPage),
+	path('', views.DisplayPage),
 
 	#Used for custom logging users in - No need for the login endpoint and sends back is_staff attribute for Role Based Access Control
-	path('api/token', views.MyTokenObtainPairView.as_view(), name='token'),
-    path('api/token/refresh', views.MyTokenObtainPairView.as_view(), name='token-refresh'),
+	path('api/token', TokenObtainPairView.as_view(), name='token'),
+    path('api/token/refresh', TokenRefreshView.as_view(), name='token-refresh'),
 
 	#USER MANAGEMENT API ENDPOINTS
 	path('api/register', views.Register.as_view(), name='api-register'),
-
-	path('api/user', views.UserManagement.as_view(), name='api-user-mgmt'),
-	path('api/user/<int:pk>', views.UserManagement.as_view(), name='api-user-mgmt-id'),
-
-	path('api/user/business-owner', views.BusinessOwnerManagement.as_view(), name='api-user-business-owner-mgmt'),
-	path('api/user/business-owner/<int:user_id>', views.BusinessOwnerManagement.as_view(), name='api-user-business-owner-mgmt-id'),
 
 	#PRODUCT MANAGEMENT API ENDPOINTS - FOR MENU
 	path('api/product', views.ProductManagement.as_view(), name='api-product'),
 	path('api/product/<int:pk>', views.ProductManagement.as_view(), name='api-product-id'),
 
-	#PRODUCT MANAGEMENT API ENDPOINTS - FOR UPLOAD PRODUCT
-	path('api/product/upload', views.UploadProductManagement.as_view(), name='api-product-upload'),
-
-	#OWNER PRODUCT MANAGEMENT API ENDPOINTS - FOR BUSINESS OWNER MGMT PAGE
-	path('api/product/owner-mgmt', views.OwnerProductManagement.as_view(), name='api-product'),
-	path('api/product/owner-mgmt/<int:pk>', views.OwnerProductManagement.as_view(), name='api-product-id'),
-
-	#PRODUCT MODERATION API ENDPOINTS - FOR PRODUCT MGMT PAGE
-	path('api/product/moderation', views.ProductModeration.as_view(), name='api-product-moderation'),
-	path('api/product/moderation/<int:pk>', views.ProductModeration.as_view(), name='api-product-moderation-id'),
-
 	#CART MANAGEMENT API ENDPOINTS
 	path('api/cart', views.CartManagement.as_view(), name='api-cart'),
 	path('api/cart/<int:pk>', views.CartManagement.as_view(), name='api-cart-id'),
-    
-	#ADD PRODUCT TO CART FUNCTIONALITY
+
+	path('api/carts', views.CartMainManagement.as_view(), name='api-cart-main'),
+	path('api/carts/<int:pk>', views.CartMainManagement.as_view(), name='api-cart-id-main'),
+
+
 	path('api/cart/add', views.AddToCart.as_view(), name='api-cart-add'),
-
-	#REMOVE PRODUCT FROM CART FUNCTIONALITY
 	path('api/cart/remove', views.CartRemoveProduct.as_view(), name='api-cart-remove'),
-
-	#INCREMENT PRODUCT QUANTITY IN USERS CART FUNCTIONALITY
 	path('api/cart/increment', views.CartIncrementProduct.as_view(), name='api-cart-increment-product'),
-
-	#DECREMENT PRODUCT QUANTITY IN USERS CART FUNCTIONALITY
 	path('api/cart/decrement', views.CartDecrementProduct.as_view(), name='api-cart-decrement-product'),
 
 	#CHECKOUT MANAGEMENT API ENDPOINTS
 	path('api/checkout', views.CheckoutManagement.as_view(), name='api-checkout'),
-	path('api/user/role/<int:pk>', views.RoleManagement.as_view(), name='user-role'),
 ]

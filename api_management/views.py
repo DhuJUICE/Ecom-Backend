@@ -1,586 +1,163 @@
-from django.shortcuts import render
-from django.shortcuts import get_object_or_404
+from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse
-from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.permissions import AllowAny
-from rest_framework import status
-from rest_framework.renderers import JSONRenderer
-from rest_framework.parsers import JSONParser
 from django.conf import settings
-from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
-import json
-import hashlib
-import hmac
-import time
-import uuid
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework import status
+from rest_framework.response import Response
 
+import json
+
+# Models
 from product_management.models import PRODUCT
 from cart_management.models import CART
 from django.contrib.auth.models import User
 
-
-
-from checkout_management.views import checkout
-from user_management.views import *
-from checkout_management.views import *
-
-#Serializers imports
+# Serializers
 from .serializers import *
 
+# Utility / Other views
+from checkout_management.views import checkout
+from user_management.views import *
+from product_management.views import ProductManagement as PMView
+from checkout_management.views import *
 
-#date usage imports
+# Import the cart endpoint classes from cart_management
+from cart_management.views import (
+    AddToCart as AddToCartView,
+    CartManagement as CartManagementView,
+    CartRemoveProduct as CartRemoveProductView,
+    CartIncrementProduct as CartIncrementProductView,
+    CartDecrementProduct as CartDecrementProductView,
+	CartMainManagement as CartMainView
+)
+
+# Date/time utility
 from django.utils.timezone import now as timezone_now
 
-# Create your views here.
+#-------------------------------------------------------------
+# Basic page view
 def DisplayPage(request):
     return render(request, 'api_template.html')
-#
 
-#custom login endpoint that returns is_staff alongside the jwt token and refresh token
-from rest_framework_simplejwt.views import TokenObtainPairView
-from .serializers import MyTokenObtainPairSerializer
-
-class MyTokenObtainPairView(TokenObtainPairView):
-    serializer_class = MyTokenObtainPairSerializer
-    
-########
-#IMAGEKIT ENDPOINT TO CREATE AND RETURN TOKEN FOR AUTHENTICATION
-
-
-def generate_imagekit_auth(request):
-    # Random unique token
-    token = str(uuid.uuid4())
-
-    # Expiry timestamp (e.g., 1 minute from now)
-    expire = int(time.time()) + 60
-
-    # String to sign: token + expire
-    string_to_sign = token + str(expire)
-
-    # Generate signature using private key
-    signature = hmac.new(
-        key=settings.IMAGEKIT_PRIVATE_KEY.encode(),
-        msg=string_to_sign.encode(),
-        digestmod=hashlib.sha1
-    ).hexdigest()
-
-    return JsonResponse({
-        'token': token,
-        'expire': expire,
-        'signature': signature
-    })
-
-#___________________________________________________________
-##############################################################
-#USER MANAGEMENT API ENDPOINTS
-#USER ROLE MANAGEMENT FOR ROLE BASED ACCESS CONTROL
-class RoleManagement(APIView):
-    permission_classes = [AllowAny]  # Change as needed
-
-    def get(self, request, pk=None):
-        if pk:
-            user = get_object_or_404(User, pk=pk)
-
-            serializer = UserSerializer(user)
-            return JsonResponse(serializer.data, status=status.HTTP_200_OK)
-        else:
-            users = User.objects.all()
-            serializer = UserSerializer(users, many=True)
-            return JsonResponse(serializer.data, safe=False, status=status.HTTP_200_OK)
-
-#API ENDPOINT FOR SIGNUP/REGISTER
+#-------------------------------------------------------------
+# API Endpoint for Signup/Register
 class Register(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        # Call the regular function
         response = register_view(request)
-
-        # If the other function returns a JsonResponse, return its content as JSON
         if isinstance(response, JsonResponse):
-            # Deserialize the content if it's a JsonResponse
             return JsonResponse(json.loads(response.content), status=response.status_code)
-
-        # Handle other response types if necessary
         return JsonResponse({"error": "Unexpected response type"}, status=500)
 
-#User management for Business owners accounts
-#User management for all users
-class BusinessOwnerManagement(APIView):
-    """
-    API endpoint for managing User accounts.
-    Supports GET, POST, PUT, DELETE.
-    """
 
-    def get(self, request, user_id=None):
-        try:
-            if user_id:
-                user = User.objects.get(id=user_id)
-                serializer = UserSerializer(user)
-                return JsonResponse({"success": True, "user": serializer.data}, status=200)
-            else:
-                users = User.objects.filter(is_staff=True)
-                serializer = UserSerializer(users, many=True)
-                return JsonResponse({"success": True, "users": serializer.data}, status=200, safe=False)
-        except User.DoesNotExist:
-            return JsonResponse({"success": False, "error": "User not found"}, status=404)
-        except Exception as e:
-            return JsonResponse({"success": False, "error": str(e)}, status=500)
-
-    def post(self, request):
-        try:
-            serializer = UserSerializer(data=request.data)
-            if serializer.is_valid():
-                serializer.save()
-                return JsonResponse({"success": True, "user": serializer.data}, status=200)
-            return JsonResponse({"success": False, "errors": serializer.errors}, status=400)
-        except Exception as e:
-            return JsonResponse({"success": False, "error": str(e)}, status=500)
-
-    def patch(self, request, user_id):
-        try:
-            user = User.objects.get(id=user_id)
-            serializer = UserSerializer(user, data=request.data, partial=True)
-            if serializer.is_valid():
-                serializer.save()
-                return JsonResponse({"success": True, "user": serializer.data}, status=200)
-            return JsonResponse({"success": False, "errors": serializer.errors}, status=400)
-        except User.DoesNotExist:
-            return JsonResponse({"success": False, "error": "User not found"}, status=404)
-        except Exception as e:
-            return JsonResponse({"success": False, "error": str(e)}, status=500)
-
-    def delete(self, request, user_id):
-        try:
-            user = User.objects.get(id=user_id)
-            user.delete()
-            return JsonResponse({"success": True, "message": "User deleted successfully"}, status=200)
-        except User.DoesNotExist:
-            return JsonResponse({"success": False, "error": "User not found"}, status=404)
-        except Exception as e:
-            return JsonResponse({"success": False, "error": str(e)}, status=500)
-
-#User management for all users
-class UserManagement(APIView):
-    """
-    API endpoint for managing User accounts.
-    Supports GET, POST, PUT, DELETE.
-    """
-
-    def get(self, request, user_id=None):
-        try:
-            if user_id:
-                user = User.objects.get(id=user_id)
-                serializer = UserSerializer(user)
-                return JsonResponse({"success": True, "user": serializer.data}, status=200)
-            else:
-                users = User.objects.all()
-                serializer = UserSerializer(users, many=True)
-                return JsonResponse({"success": True, "users": serializer.data}, status=200, safe=False)
-        except User.DoesNotExist:
-            return JsonResponse({"success": False, "error": "User not found"}, status=404)
-        except Exception as e:
-            return JsonResponse({"success": False, "error": str(e)}, status=500)
-
-    def post(self, request):
-        try:
-            serializer = UserSerializer(data=request.data)
-            if serializer.is_valid():
-                serializer.save()
-                return JsonResponse({"success": True, "user": serializer.data}, status=200)
-            return JsonResponse({"success": False, "errors": serializer.errors}, status=400)
-        except Exception as e:
-            return JsonResponse({"success": False, "error": str(e)}, status=500)
-
-    def put(self, request, user_id):
-        try:
-            user = User.objects.get(id=user_id)
-            serializer = UserSerializer(user, data=request.data, partial=True)
-            if serializer.is_valid():
-                serializer.save()
-                return JsonResponse({"success": True, "user": serializer.data}, status=200)
-            return JsonResponse({"success": False, "errors": serializer.errors}, status=400)
-        except User.DoesNotExist:
-            return JsonResponse({"success": False, "error": "User not found"}, status=404)
-        except Exception as e:
-            return JsonResponse({"success": False, "error": str(e)}, status=500)
-
-    def delete(self, request, user_id):
-        try:
-            user = User.objects.get(id=user_id)
-            user.delete()
-            return JsonResponse({"success": True, "message": "User deleted successfully"}, status=200)
-        except User.DoesNotExist:
-            return JsonResponse({"success": False, "error": "User not found"}, status=404)
-        except Exception as e:
-            return JsonResponse({"success": False, "error": str(e)}, status=500)
-
-
-######################################################
-#UPLOAD PRODUCT MANAGEMENT API ENDPOINTS
-class UploadProductManagement(APIView):
-    permission_classes = [IsAuthenticated]
-
-    # Upload/add a new product
-    def post(self, request):
-        # Inject uploadUser into the request data
-        data = request.data.copy()
-        data['uploadUser'] = request.user.id
-
-        serializer = ProductSerializer(data=data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-#___________________________________________________________
-#BUSINESS OWNER PRODUCT MANAGEMENT API ENDPOINTS
-class OwnerProductManagement(APIView):
-    permission_classes = [IsAuthenticated]
-
-    # Get all products or a specific product by ID
-    def get(self, request):
-        user = request.user.id
-        products = PRODUCT.objects.filter(uploadUser_id=user)
-        serializer = ProductSerializer(products, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-	# Update an existing product
-    def patch(self, request, pk):
-        try:
-            product = PRODUCT.objects.get(pk=pk)
-        except PRODUCT.DoesNotExist:
-            return Response({"error": "Product not found"}, status=status.HTTP_404_NOT_FOUND)
-        
-        serializer = ProductSerializer(product, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    # Delete a product
-    def delete(self, request, pk):
-        try:
-            product = PRODUCT.objects.get(pk=pk)
-            product.delete()
-            return Response({"message": "Product deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
-        except PRODUCT.DoesNotExist:
-            return Response({"error": "Product not found"}, status=status.HTTP_404_NOT_FOUND)
-#___________________________________________________________
-#PRODUCT MODERATION API ENDPOINTS
-class ProductModeration(APIView):
-    permission_classes = [IsAuthenticated]
-
-    # Get all products or a specific product by ID
-    def get(self, request):
-        #products = PRODUCT.objects.all()
-        products = PRODUCT.objects.filter(moderation_status="pending")
-        serializer = ProductSerializer(products, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    # Update an existing product's moderation_status only using PATCH
-    def patch(self, request, pk):
-        try:
-            product = PRODUCT.objects.get(pk=pk)
-        except PRODUCT.DoesNotExist:
-            return Response({"error": "Product not found"}, status=status.HTTP_404_NOT_FOUND)
-        
-        serializer = ProductSerializer(product, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-#___________________________________________________________
-#PRODUCT MANAGEMENT API ENDPOINTS
+#-------------------------------------------------------------
 class ProductManagement(APIView):
     permission_classes = [AllowAny]
 
-    # Get all products or a specific product by ID
     def get(self, request, pk=None):
-        if pk:
-            try:
-                product = PRODUCT.objects.get(pk=pk)
-                serializer = ProductSerializer(product)
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            except PRODUCT.DoesNotExist:
-                return Response({"error": "Product not found"}, status=status.HTTP_404_NOT_FOUND)
-        else:
-            #products = PRODUCT.objects.all()
-            products = PRODUCT.objects.filter(moderation_status="approved")
-            serializer = ProductSerializer(products, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+        """
+        Delegates GET request to the ProductManagement view in product_management app.
+        """
+        view = PMView()
+        response = view.get(request, pk=pk)
+        if hasattr(response, "data"):
+            return JsonResponse(response.data, status=response.status_code, safe=False)
+        return JsonResponse({"error": "Unexpected response type"}, status=500)
 
-    # Update an existing product
-    def put(self, request, pk):
-        try:
-            product = PRODUCT.objects.get(pk=pk)
-        except PRODUCT.DoesNotExist:
-            return Response({"error": "Product not found"}, status=status.HTTP_404_NOT_FOUND)
-        
-        serializer = ProductSerializer(product, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def post(self, request):
+        """
+        Delegates POST request (if needed) to ProductManagement view.
+        """
+        view = PMView()
+        response = view.post(request)
+        if hasattr(response, "data"):
+            return JsonResponse(response.data, status=response.status_code, safe=False)
+        return JsonResponse({"error": "Unexpected response type"}, status=500)
 
-    # Delete a product
-    def delete(self, request, pk):
-        try:
-            product = PRODUCT.objects.get(pk=pk)
-            product.delete()
-            return Response({"message": "Product deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
-        except PRODUCT.DoesNotExist:
-            return Response({"error": "Product not found"}, status=status.HTTP_404_NOT_FOUND)
-#___________________________________________________________
+    def put(self, request, pk=None):
+        """
+        Delegates PUT request to ProductManagement view.
+        """
+        view = PMView()
+        response = view.put(request, pk=pk)
+        if hasattr(response, "data"):
+            return JsonResponse(response.data, status=response.status_code, safe=False)
+        return JsonResponse({"error": "Unexpected response type"}, status=500)
+
+    def delete(self, request, pk=None):
+        """
+        Delegates DELETE request to ProductManagement view.
+        """
+        view = PMView()
+        response = view.delete(request, pk=pk)
+        if hasattr(response, "data"):
+            return JsonResponse(response.data, status=response.status_code, safe=False)
+        return JsonResponse({"error": "Unexpected response type"}, status=500)
+
+#-------------------------------------------------------------
+# CART MANAGEMENT API ENDPOINTS (using imported views)
+
 class AddToCart(APIView):
     permission_classes = [IsAuthenticated]
 
-    """
-    API endpoint for managing ADDING to the CART model.
-    Supports POST
-    """
-
     def post(self, request):
-        """
-        Add or update a menu item in the user's cart with full product details.
-        """
-        try:
-            user = request.user  # Get the authenticated user
-            data = request.data
+        return AddToCartView().post(request)
 
-            product_id = str(data.get("productId"))  # Convert to string for dict key
-            quantity = int(data.get("quantity", 1))  # Default quantity is 1
-            prod_name = data.get("prodName")
-            prod_price = data.get("prodPrice")
-            prod_image = data.get("prodImagePath")
 
-            # Validate required fields
-            if not all([product_id, prod_name, prod_price, prod_image]):
-                return JsonResponse({
-                    "success": False,
-                    "error": "Product ID, name, price, and image are required"
-                }, status=400)
-
-            # Get or create the cart for the user
-            cart, created = CART.objects.get_or_create(user=user)
-
-            # Load existing menuCartItems
-            cart_items = cart.menuCartItems  # this is a dict
-
-            # Update or add the product
-            cart_items[product_id] = {
-                "id": product_id,
-                "prodName": prod_name,
-                "prodPrice": prod_price,
-                "prodImagePath": prod_image,
-                "quantity": quantity
-            }
-
-            # Save updated cart
-            cart.menuCartItems = cart_items
-            cart.save()
-
-            return JsonResponse({"success": True, "cart": cart_items}, status=200)
-
-        except Exception as e:
-            return JsonResponse({"success": False, "error": str(e)}, status=500)
-
-#CART MANAGEMENT API ENDPOINTS
 class CartManagement(APIView):
     permission_classes = [IsAuthenticated]
 
-    """
-    API endpoint for managing the CART model.
-    Supports GET, POST, PUT, DELETE.
-    """
     def get(self, request):
-        try:
-            # Check if the user is authenticated
-            if not request.user.is_authenticated:
-                return JsonResponse({"success": False, "message": "Please log in to see your cart."}, status=401)
-            
-            # Get the cart for the authenticated user
-            cart = CART.objects.get(user=request.user.id)
-
-            user_id = request.user.id
-
-            # Extract menuCartItems
-            cart_items = cart.menuCartItems  # This is already stored as a dictionary
-
-            return JsonResponse({"success": True, "cart": cart_items, "user_id":user_id}, status=200)
-
-        except CART.DoesNotExist:
-            return JsonResponse({"success": False, "cart": {}}, status=200)  # Return empty cart if not found
-        except Exception as e:
-            return JsonResponse({"success": False, "error": str(e)}, status=500)
+        return CartManagementView().get(request)
 
     def post(self, request):
-        """
-        Create a new cart item.
-        Returns JSON response.
-        """
-        try:
-            serializer = CartSerializer(data=request.data)
-            if serializer.is_valid():
-                serializer.save()
-                return JsonResponse({"success": True, "data": serializer.data}, status=201)
-            return JsonResponse({"success": False, "errors": serializer.errors}, status=400)
-        except Exception as e:
-            return JsonResponse({"success": False, "error": str(e)}, status=500)
+        return CartManagementView().post(request)
 
     def put(self, request, cart_id):
-        """
-        Update an existing cart item.
-        Returns JSON response.
-        """
-        try:
-            cart_item = CART.objects.get(id=cart_id)
-            serializer = CartSerializer(cart_item, data=request.data)
-            if serializer.is_valid():
-                serializer.save()
-                return JsonResponse({"success": True, "data": serializer.data}, status=200)
-            return JsonResponse({"success": False, "errors": serializer.errors}, status=400)
-        except CART.DoesNotExist:
-            return JsonResponse({"success": False, "error": "Cart item not found"}, status=404)
-        except Exception as e:
-            return JsonResponse({"success": False, "error": str(e)}, status=500)
+        return CartManagementView().put(request, cart_id)
 
     def delete(self, request, cart_id):
-        """
-        Delete a cart item.
-        Returns JSON response.
-        """
-        try:
-            cart_item = CART.objects.get(id=cart_id)
-            cart_item.delete()
-            return JsonResponse({"success": True, "message": "Cart item deleted successfully"}, status=204)
-        except CART.DoesNotExist:
-            return JsonResponse({"success": False, "error": "Cart item not found"}, status=404)
-        except Exception as e:
-            return JsonResponse({"success": False, "error": str(e)}, status=500)
+        return CartManagementView().delete(request, cart_id)
+
 
 class CartRemoveProduct(APIView):
     permission_classes = [IsAuthenticated]
 
     def put(self, request):
-        """
-        Remove a menu item from the user's cart.
-        """
-        try:
-            user = request.user
-            data = request.data
-            product_id = str(data.get("productId"))
+        return CartRemoveProductView().put(request)
 
-            if not product_id:
-                return JsonResponse({"success": False, "error": "Product ID is required"}, status=400)
 
-            # Get the user's cart
-            cart = CART.objects.filter(user=user).first()
-            if not cart:
-                return JsonResponse({"success": False, "error": "Cart not found"}, status=404)
-
-            # Load existing menuCartItems
-            cart_items = cart.menuCartItems or {}
-
-            # Remove the product if it exists
-            if product_id in cart_items:
-                del cart_items[product_id]
-                cart.menuCartItems = cart_items
-                cart.save()
-                return JsonResponse({"success": True, "message": "Product removed from cart", "cart": cart_items}, status=200)
-            else:
-                return JsonResponse({"success": False, "error": "Product is not in user's cart"}, status=400)
-
-        except Exception as e:
-            return JsonResponse({"success": False, "error": str(e)}, status=500)
-
-#api view functionality to increment a certain products quantity by 1 
 class CartIncrementProduct(APIView):
     permission_classes = [IsAuthenticated]
 
     def put(self, request):
-        """
-        Increment a menu item quantity in the user's cart.
-        """
-        try:
-            user = request.user
-            data = request.data
-            product_id = str(data.get("productId"))
+        return CartIncrementProductView().put(request)
 
-            if not product_id:
-                return JsonResponse({"success": False, "error": "Product ID is required"}, status=400)
 
-            # Get the user's cart
-            cart = CART.objects.filter(user=user).first()
-            if not cart:
-                return JsonResponse({"success": False, "error": "Cart not found"}, status=404)
-
-            # Ensure cart_items is always a dictionary
-            cart_items = cart.menuCartItems or {}
-
-            # Increment the quantity if the product exists
-            if product_id in cart_items:
-                cart_items[product_id] += 1  # Increment quantity
-            else:
-                return JsonResponse({"success": False, "error": "Product is not in user's cart"}, status=400)
-
-            # Save the updated cart
-            cart.menuCartItems = cart_items
-            cart.save()
-
-            return JsonResponse({"success": True, "message": "Product quantity incremented in user's cart", "cart": cart_items}, status=200)
-
-        except Exception as e:
-            return JsonResponse({"success": False, "error": str(e)}, status=500)
-
-#api view functionality to decrement a certain products quantity by 1 
 class CartDecrementProduct(APIView):
     permission_classes = [IsAuthenticated]
 
     def put(self, request):
-        """
-        Decrement a menu item quantity in the user's cart.
-        """
-        try:
-            user = request.user
-            data = request.data
-            product_id = str(data.get("productId"))
+        return CartDecrementProductView().put(request)
 
-            if not product_id:
-                return JsonResponse({"success": False, "error": "Product ID is required"}, status=400)
+#=============================
+# Single cart endpoint through API
+class CartMainManagement(APIView):
+    permission_classes = [IsAuthenticated]
 
-            # Get the user's cart
-            cart = CART.objects.filter(user=user).first()
-            if not cart:
-                return JsonResponse({"success": False, "error": "Cart not found"}, status=404)
+    def get(self, request):
+        # Delegate GET request to the cart_management view
+        return CartMainView().get(request)
 
-            # Ensure cart_items is always a dictionary
-            cart_items = cart.menuCartItems or {}
-
-            # Check if the product exists in the cart
-            if product_id in cart_items:
-                if cart_items[product_id] > 1:
-                    cart_items[product_id] -= 1  # Decrement quantity
-                else:
-                    return JsonResponse({"success": False, "error": "Cannot decrement further, quantity is already 1"}, status=400)
-            else:
-                return JsonResponse({"success": False, "error": "Product is not in user's cart"}, status=400)
-
-            # Save the updated cart
-            cart.menuCartItems = cart_items
-            cart.save()
-
-            return JsonResponse({"success": True, "message": "Product quantity decremented in user's cart", "cart": cart_items}, status=200)
-
-        except Exception as e:
-            return JsonResponse({"success": False, "error": str(e)}, status=500)
-
-#___________________________________________________________
-
-#___________________________________________________________
-#CHECKOUT MANAGEMENT API ENDPOINTS
+    def put(self, request):
+        # Delegate PUT request (all actions: add/remove/inc/dec)
+        return CartMainView().put(request)
+#-------------------------------------------------------------
+# CHECKOUT MANAGEMENT API ENDPOINTS
 class CheckoutManagement(APIView):
     permission_classes = [AllowAny]
 

@@ -3,18 +3,8 @@ from product_management.models import PRODUCT
 from cart_management.models import CART
 from django.contrib.auth.models import User
 
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from user_management.models import UserProfile
 
-#custom serializer to add a field to the returned data from token endpoint
-class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
-    def validate(self, attrs):
-        data = super().validate(attrs)
-
-        # Add custom fields to the response data
-        data['is_staff'] = self.user.is_staff
-        data['user_id'] = self.user.id
-        return data
 
 class ProductSerializer(serializers.ModelSerializer):
     uploadUser = serializers.PrimaryKeyRelatedField(read_only=True)  # Prevent trying to update it
