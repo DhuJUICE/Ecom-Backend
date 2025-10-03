@@ -10,9 +10,6 @@ from rest_framework.response import Response
 
 import json
 
-# Models
-from product_management.models import PRODUCT
-from cart_management.models import CART
 from django.contrib.auth.models import User
 
 # Serializers
@@ -25,14 +22,7 @@ from product_management.views import ProductManagement as PMView
 from checkout_management.views import *
 
 # Import the cart endpoint classes from cart_management
-from cart_management.views import (
-    AddToCart as AddToCartView,
-    CartManagement as CartManagementView,
-    CartRemoveProduct as CartRemoveProductView,
-    CartIncrementProduct as CartIncrementProductView,
-    CartDecrementProduct as CartDecrementProductView,
-	CartMainManagement as CartMainView
-)
+from cart_management.views import CartManagement as CartMainView
 
 # Date/time utility
 from django.utils.timezone import now as timezone_now
@@ -98,55 +88,9 @@ class ProductManagement(APIView):
             return JsonResponse(response.data, status=response.status_code, safe=False)
         return JsonResponse({"error": "Unexpected response type"}, status=500)
 
-#-------------------------------------------------------------
-# CART MANAGEMENT API ENDPOINTS (using imported views)
-
-class AddToCart(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def post(self, request):
-        return AddToCartView().post(request)
-
-
-class CartManagement(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request):
-        return CartManagementView().get(request)
-
-    def post(self, request):
-        return CartManagementView().post(request)
-
-    def put(self, request, cart_id):
-        return CartManagementView().put(request, cart_id)
-
-    def delete(self, request, cart_id):
-        return CartManagementView().delete(request, cart_id)
-
-
-class CartRemoveProduct(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def put(self, request):
-        return CartRemoveProductView().put(request)
-
-
-class CartIncrementProduct(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def put(self, request):
-        return CartIncrementProductView().put(request)
-
-
-class CartDecrementProduct(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def put(self, request):
-        return CartDecrementProductView().put(request)
-
 #=============================
 # Single cart endpoint through API
-class CartMainManagement(APIView):
+class CartManagement(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
