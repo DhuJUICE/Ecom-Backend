@@ -42,9 +42,9 @@ def checkout(request):
         payload = {
             "merchant_id": PAYFAST_MERCHANT_ID,
             "merchant_key": PAYFAST_MERCHANT_KEY,
-            "return_url": "https://yourdomain.com/payment-success",
+            "return_url": "https://heranbites.onrender.com/#/success",
             "cancel_url": "https://yourdomain.com/payment-cancel",
-            "notify_url": "https://pen-waterproof-posts-allows.trycloudflare.com/ipn",
+            "notify_url": "https://heranbites-backend.onrender.com/ipn",
             "m_payment_id": m_payment_id,
             "amount": "%.2f" % amount,
             "item_name": f"Order #{m_payment_id}",
