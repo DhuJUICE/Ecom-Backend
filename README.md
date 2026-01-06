@@ -71,11 +71,7 @@ Sensitive credentials are excluded from version control.
 What This Repo Demonstrates
 
 Backend API design
-
 Real-world payment integration
-
 Secure configuration handling
-
 Cloud-hosted database usage
-
 Independent ownership of a production-style backend
