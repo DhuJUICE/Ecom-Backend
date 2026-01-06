@@ -10,7 +10,7 @@ The Django backend for a food ordering and prepayment platform designed to help 
 ## Overview
 
 This backend handles:
-- Product and order management
+- User, Product, Order, and Checkout management
 - Payment processing integration
 - Business logic and data persistence
 
