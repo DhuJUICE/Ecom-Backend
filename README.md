@@ -1,5 +1,4 @@
-
----
+> *Part of a full-stack food ordering platform (see companion repository for backend/frontend).*
 
 ## 📁 Backend Repository README (Django)
 
